@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tailor Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome {{ tailor.tailor_name }} to your dashboard</h1>
+        <h2>Current Work</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>SKU Name</th>
+                    <th>Quantity</th>
+                    <th>Size</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in current_work %}
+                    <tr>
+                        <td>{{ item.order.id }}</td>
+                        <td>{{ item.sku.sku_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.size }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2>Payouts</h2>
+        <p>Total payouts: ${{ payouts }}</p>
+    </div>
+</body>
+</html>
