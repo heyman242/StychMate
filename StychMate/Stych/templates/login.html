@@ -45,7 +45,7 @@
     </style>
 </head>
 <body>
-    <form method="post" action="{% url 'tailor_dashboard'%}">
+    <form method="post" >
         {% csrf_token %}
         <label for="username">Username:</label>
         <input type="text" name="username" required><br>

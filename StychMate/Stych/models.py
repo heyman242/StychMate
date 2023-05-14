@@ -12,15 +12,16 @@ class SKU(models.Model):
         return self.sku_name
 
 class Tailor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='tailor')
-    tailor_id = models.AutoField(primary_key=True, default=None)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    tailor_id = models.CharField(max_length=5, unique=True)
     tailor_name = models.CharField(max_length=100)
     tailor_location = models.CharField(max_length=100)
-    tailor_availability = models.IntegerField()
-    tailor_payout = models.DecimalField(max_digits=10, decimal_places=2)
-    
+    tailor_availability = models.CharField(max_length=100)
+    tailor_payout = models.DecimalField(max_digits=6, decimal_places=2)
+
     def __str__(self):
         return self.tailor_name
+
 
 class Hub(models.Model):
     hub_id = models.AutoField(primary_key=True)
