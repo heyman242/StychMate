@@ -57,12 +57,16 @@
         <label for="tailor_name">Tailor Name:</label>
         <input type="text" name="tailor_name" required><br>
         <label for="tailor_location">Tailor Location:</label>
-        <input type="text" name="tailor_location" required><br>
-        <label for="tailor_availability">Tailor Availability:</label>
-        <input type="text" name="tailor_availability" required><br>
-        <label for="tailor_payout">Tailor Payout:</label>
-        <input type="number" name="tailor_payout" required><br>
+        <select name="tailor_location" required>
+            <option value="">Select Location</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Pune">Pune</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Kolkata">Kolkata</option>
+            <option value="Bangalore">Bangalore</option>
+        </select><br>
         <button type="submit">Sign Up</button>
     </form>
 </body>
+
 </html>

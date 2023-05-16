@@ -1,10 +1,14 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from .models import Tailor, Order, Order_Item, SKU
+from .models import Tailor, Order, SKU
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
 from django.urls import reverse
+import random
+from django.utils import timezone
+from .models import SKU, Tailor, Hub, Order
+from django.db.models import Q
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -16,7 +20,6 @@ def login_view(request):
             tailor = Tailor.objects.get(user=user)
             tailor_id = int(request.user.tailor.tailor_id[2:])
             tailor_dashboard_url = reverse('tailor_dashboard', args=[tailor_id])
-            
 
             return redirect(tailor_dashboard_url)
         else:
@@ -33,8 +36,6 @@ def signup(request):
         password2 = request.POST.get('password2')
         tailor_name = request.POST.get('tailor_name')
         tailor_location = request.POST.get('tailor_location')
-        tailor_availability = request.POST.get('tailor_availability')
-        tailor_payout = request.POST.get('tailor_payout')
 
         # check if passwords match
         if password1 != password2:
@@ -48,9 +49,7 @@ def signup(request):
         # create tailor instance
         tailor = Tailor(user=user,
                         tailor_name=tailor_name,
-                        tailor_location=tailor_location,
-                        tailor_availability=tailor_availability,
-                        tailor_payout=tailor_payout)
+                        tailor_location=tailor_location)
         tailor.save()
         tailor.tailor_id = f'T-{tailor.pk:04d}'  # use the primary key of the Tailor object
         tailor.save()
@@ -61,11 +60,19 @@ def signup(request):
         return render(request, 'signup.html')
 
 
+from django.shortcuts import render, get_object_or_404
+from .models import Tailor, Order
+
 @login_required
 def tailor_dashboard(request, tailor_id):
-    tailor = Tailor.objects.get(pk=tailor_id)
-    context = {
-        'tailor_id': tailor_id,
-    }
-    return render(request, 'tailor_dashboard.html', context)
+    tailor = get_object_or_404(Tailor, pk=tailor_id)
+    current_work = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location,
+                                        order_status='Pending')
 
+    context = {
+        'tailor': tailor,
+        'current_work': current_work,
+        'payouts': tailor.tailor_payout,
+    }
+
+    return render(request, 'tailor_dashboard.html', context)

@@ -10,30 +10,33 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome {{ tailor.tailor_name }} to your dashboard</h1>
-        <h2>Current Work</h2>
-        <table class="table">
-            <thead>
+    <h1>Welcome {{ tailor.tailor_name }} to your dashboard</h1>
+    <h2>Available Work</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>SKU Name</th>
+                <th>Size</th>
+                <th>Status</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in current_work %}
                 <tr>
-                    <th>Order ID</th>
-                    <th>SKU Name</th>
-                    <th>Quantity</th>
-                    <th>Size</th>
+                    <td>{{ item.order_id }}</td>
+                    <td>{{ item.sku.sku_name }}</td>
+                    <td>{{ item.sku.sku_size }}</td>
+                    <td>{{ item.order_status }}</td>
+                    <td>{{ item.sku.sku_price}}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for item in current_work %}
-                    <tr>
-                        <td>{{ item.order.id }}</td>
-                        <td>{{ item.sku.sku_name }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.size }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h2>Payouts</h2>
-        <p>Total payouts: ${{ payouts }}</p>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Payouts</h2>
+    <p>Total payouts: ${{ payouts }}</p>
+</div>
+
 </body>
 </html>
