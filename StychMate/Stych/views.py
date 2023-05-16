@@ -1,13 +1,11 @@
-from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from .models import Tailor, Order, SKU
 from django.contrib.auth.models import User
 from django.urls import reverse
-import random
-from django.utils import timezone
-from .models import SKU, Tailor, Hub, Order
-from django.db.models import Q
+from django.shortcuts import render, get_object_or_404
+from .models import Tailor, Order
+from django.shortcuts import redirect
+from decimal import Decimal
 
 
 def login_view(request):
@@ -60,18 +58,29 @@ def signup(request):
         return render(request, 'signup.html')
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import Tailor, Order
-
 @login_required
 def tailor_dashboard(request, tailor_id):
     tailor = get_object_or_404(Tailor, pk=tailor_id)
-    current_work = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location,
-                                        order_status='Pending')
+    current_work = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location, order_status='Pending')
+
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        order = get_object_or_404(Order, pk=order_id)
+        if order.order_status == 'Pending':
+            order.order_status = 'Assigned'
+            order.save()
+        elif order.order_status == 'Assigned':
+            payout = order.sku.sku_price * Decimal(1 / 6)
+            tailor.tailor_payout += payout
+            tailor.save()
+            order.delete()
+
+    assigned_work = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location, order_status='Assigned')
 
     context = {
         'tailor': tailor,
         'current_work': current_work,
+        'assigned_work': assigned_work,
         'payouts': tailor.tailor_payout,
     }
 

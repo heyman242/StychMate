@@ -14,7 +14,6 @@ hub_locations = ['Mumbai', 'Pune', 'Bangalore', 'Hyderabad']
 def generate_orders():
     for _ in range(1000):
         sku = random.choice(skus)
-        quantity = random.randint(1, 10)
         order = Order.objects.create(sku=sku)
         order.assigned_hub = Hub.objects.get(hub_location=random.choice(hub_locations))
         order.save()

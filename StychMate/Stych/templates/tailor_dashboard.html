@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tailor Dashboard</title>
+    <title>Tailor Dashboard </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -9,34 +9,86 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="container">
-    <h1>Welcome {{ tailor.tailor_name }} to your dashboard</h1>
-    <h2>Available Work</h2>
+   <div class="container">
+    <h1>Welcome {{ tailor.tailor_name }} to your dashboard <br> Total payouts: ${{ payouts }}</h1>
+
+           <h2>Assigned Work</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>SKU Name</th>
+            <th>Price</th>
+            <th>Size</th>
+            <th>Status</th>
+            <th>Actions</th> <!-- Add this line -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in assigned_work %}
+            <tr>
+                <td>{{ order.order_id }}</td>
+                <td>{{ order.sku.sku_name }}</td>
+                <td>{{ order.sku.sku_price }}</td>
+                <td>{{ order.sku.sku_size }}</td>
+                <td>{{ order.order_status }}</td>
+                <td>
+                    <form method="POST" action="{% url 'tailor_dashboard' tailor_id=tailor.user.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.order_id }}">
+                        <button type="submit" class="btn btn-danger">Complete</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    <h2>Current Work</h2>
     <table class="table">
         <thead>
             <tr>
                 <th>Order ID</th>
                 <th>SKU Name</th>
+                <th>Price</th>
                 <th>Size</th>
                 <th>Status</th>
-                <th>Price</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in current_work %}
+            {% for order in current_work %}
                 <tr>
-                    <td>{{ item.order_id }}</td>
-                    <td>{{ item.sku.sku_name }}</td>
-                    <td>{{ item.sku.sku_size }}</td>
-                    <td>{{ item.order_status }}</td>
-                    <td>{{ item.sku.sku_price}}</td>
+                    <td>{{ order.order_id }}</td>
+                    <td>{{ order.sku.sku_name }}</td>
+                    <td>{{ order.sku.sku_price }}</td>
+                    <td>{{ order.sku.sku_size }}</td>
+                    <td>{{ order.order_status }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'tailor_dashboard' tailor_id=tailor.user.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.order_id }}">
+                            {% if order.order_status == 'Pending' %}
+                                <button type="submit" class="btn btn-primary">Assign</button>
+                            {% elif order.order_status == 'Assigned' %}
+                                <button type="submit" class="btn btn-danger">Complete</button>
+                            {% endif %}
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+
+
     <h2>Payouts</h2>
     <p>Total payouts: ${{ payouts }}</p>
 </div>
+
+
+
+
+
 
 </body>
 </html>
