@@ -1,31 +1,102 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tailor Dashboard </title>
+    <title>Tailor Dashboard</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #333;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #fff;
+        }
+
+    .container {
+        margin-top: 50px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+        background-color: #444;
+    }
+
+
+    h2 {
+        color: #76D7C4;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    h1 {
+        color: 	#EC7063;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    table {
+        color: #fff;
+    }
+
+    th {
+        background-color: #555;
+    }
+
+    .btn-primary {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .btn-primary:hover {
+        background-color: #3e8e41;
+        border-color: #3e8e41;
+    }
+
+    .btn-danger {
+        background-color: #F44336;
+        border-color: #F44336;
+    }
+
+    .btn-danger:hover {
+        background-color: #d32f2f;
+        border-color: #d32f2f;
+    }
+
+    p {
+        color: #fff;
+    }
+    .logout-btn {
+            position: absolute;
+            top: 100px;
+            right: 170px;
+        }
+
+</style>
 </head>
 <body>
-   <div class="container">
-    <h1>Welcome {{ tailor.tailor_name }} to your dashboard <br> Total payouts: ${{ payouts }}</h1>
+    <div class="container">
+        <form action="{% url 'logout' %}" method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-default logout-btn">Logout</button>
+</form>
+        <h1>Welcome {{ tailor.tailor_name }} to your dashboard<br>Total payouts: <u>${{ payouts|floatformat:2 }}</u>  <br>Remaining work for today: {{ remaining_work_count }}</h1>
 
-           <h2>Assigned Work</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>SKU Name</th>
-            <th>Price</th>
-            <th>Size</th>
-            <th>Status</th>
-            <th>Actions</th> <!-- Add this line -->
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in assigned_work %}
+    <h2>Current Work</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>SKU Name</th>
+                <th>Price</th>
+                <th>Size</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in assigned_work %}
             <tr>
                 <td>{{ order.order_id }}</td>
                 <td>{{ order.sku.sku_name }}</td>
@@ -40,10 +111,11 @@
                     </form>
                 </td>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
-    <h2>Current Work</h2>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Available Work</h2>
     <table class="table">
         <thead>
             <tr>
@@ -57,38 +129,30 @@
         </thead>
         <tbody>
             {% for order in current_work %}
-                <tr>
-                    <td>{{ order.order_id }}</td>
-                    <td>{{ order.sku.sku_name }}</td>
-                    <td>{{ order.sku.sku_price }}</td>
-                    <td>{{ order.sku.sku_size }}</td>
-                    <td>{{ order.order_status }}</td>
-                    <td>
-                        <form method="POST" action="{% url 'tailor_dashboard' tailor_id=tailor.user.pk %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="order_id" value="{{ order.order_id }}">
-                            {% if order.order_status == 'Pending' %}
-                                <button type="submit" class="btn btn-primary">Assign</button>
-                            {% elif order.order_status == 'Assigned' %}
-                                <button type="submit" class="btn btn-danger">Complete</button>
-                            {% endif %}
-                        </form>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ order.order_id }}</td>
+                <td>{{ order.sku.sku_name }}</td>
+                <td>{{ order.sku.sku_price }}</td>
+                <td>{{ order.sku.sku_size }}</td>
+                <td>{{ order.order_status }}</td>
+                <td>
+                    <form method="POST" action="{% url 'tailor_dashboard' tailor_id=tailor.user.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.order_id }}">
+                        {% if order.order_status == 'Pending' %}
+                        <button type="submit" class="btn btn-primary">Assign</button>
+                        {% elif order.order_status == 'Assigned' %}
+                        <button type="submit" class="btn btn-danger">Complete</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 
-
-
     <h2>Payouts</h2>
     <p>Total payouts: ${{ payouts }}</p>
 </div>
-
-
-
-
-
-
 </body>
 </html>

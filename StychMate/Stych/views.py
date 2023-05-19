@@ -1,11 +1,14 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.shortcuts import render, get_object_or_404
 from .models import Tailor, Order
+from datetime import date
 from django.shortcuts import redirect
+from django.contrib.auth import logout
 from decimal import Decimal
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 
 
 def login_view(request):
@@ -58,6 +61,11 @@ def signup(request):
         return render(request, 'signup.html')
 
 
+def custom_logout(request):
+    logout(request)
+    return redirect('login')
+
+
 @login_required
 def tailor_dashboard(request, tailor_id):
     tailor = get_object_or_404(Tailor, pk=tailor_id)
@@ -68,20 +76,42 @@ def tailor_dashboard(request, tailor_id):
         order = get_object_or_404(Order, pk=order_id)
         if order.order_status == 'Pending':
             order.order_status = 'Assigned'
-            order.save()
+
+            # Check if the tailor has reached the limit of 10 assigned work per day
+            today = date.today().strftime('%Y-%m-%d')
+            assigned_work_count = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location,
+                                                       order_status='Assigned',
+                                                       assigned_date=today).count()
+            if assigned_work_count < 10:
+                order.assigned_date = today
+                order.save()
+            else:
+                # Handle the case when the limit is reached
+                # You can display an error message or redirect the user to a different page
+                return HttpResponse("You have reached the daily limit of assigned work.")
+
         elif order.order_status == 'Assigned':
-            payout = order.sku.sku_price * Decimal(1 / 6)
+            payout = order.sku.sku_price * Decimal(0.16)
             tailor.tailor_payout += payout
             tailor.save()
             order.delete()
 
     assigned_work = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location, order_status='Assigned')
 
+    # Limit completed work per day to 10
+    today = date.today().strftime('%Y-%m-%d')
+    assigned_work_count = Order.objects.filter(assigned_hub__hub_location=tailor.tailor_location,
+                                               order_status='Assigned',
+                                               assigned_date=today).count()
+    remaining_work_count = 10 - assigned_work_count
+
     context = {
         'tailor': tailor,
         'current_work': current_work,
         'assigned_work': assigned_work,
         'payouts': tailor.tailor_payout,
+        'remaining_work_count': remaining_work_count,
+
     }
 
     return render(request, 'tailor_dashboard.html', context)
